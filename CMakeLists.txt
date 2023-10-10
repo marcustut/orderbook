@@ -9,11 +9,24 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 file(GLOB SOURCES
     src/*.h
     src/*.cpp
+    src/datasources/*.h
+    src/datasources/*.cpp
+)
+
+add_library(${CMAKE_PROJECT_NAME}_lib STATIC ${SOURCES})
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME}_lib
+  quickfix
+  OpenSSL::SSL
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})
-
-add_library(${CMAKE_PROJECT_NAME}_lib STATIC ${SOURCES})
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME}
+  ${CMAKE_PROJECT_NAME}_lib
+  quickfix
+  OpenSSL::SSL
+)
 
 include(FetchContent)
 
@@ -26,17 +39,6 @@ FetchContent_Declare(
     URL https://github.com/quickfix/quickfix/archive/868e5d1141904318c0178f6ba809721c7a51074d.zip
 )
 FetchContent_MakeAvailable(quickfix)
-
-target_link_libraries(
-  ${CMAKE_PROJECT_NAME}_lib
-  quickfix
-  OpenSSL::SSL
-)
-target_link_libraries(
-  ${CMAKE_PROJECT_NAME}
-  quickfix
-  OpenSSL::SSL
-)
 
 # Google Test
 FetchContent_Declare(
