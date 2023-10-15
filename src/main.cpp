@@ -6,12 +6,14 @@
 
 #include "orderbook.h"
 
-int main() {
+int main()
+{
   OrderBook ob = OrderBook();
 
-  try {
+  try
+  {
     FIX::SessionSettings settings("fix_settings.cfg");
-    DeribitFIX application(settings);
+    Deribit::Fix application(settings);
 
     // Run the FIX engine
     application.run();
@@ -23,14 +25,17 @@ int main() {
     /*     application.request_symbol_info(); */
 
     // Request market data
-    application.request_market_data("BTC-PERPETUAL");
+    application.request_order_book("BTC-PERPETUAL", 1);
 
-    while (true) {
+    while (true)
+    {
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     return 0;
-  } catch (const std::exception &e) {
+  }
+  catch (const std::exception &e)
+  {
     std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }

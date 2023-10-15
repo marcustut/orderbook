@@ -113,8 +113,8 @@
    <field name='TradingSessionSubID' required='N' />
   </message>
   <message name='ExecutionReport' msgtype='8' msgcat='app'>
-   <field name='OrderID' required='Y' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='Y' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <field name='SecondaryExecID' required='N' />
    <field name='ClOrdID' required='N' />
@@ -253,8 +253,8 @@
    <component name='MiscFeesGrp' required='N' />
   </message>
   <message name='OrderCancelReject' msgtype='9' msgcat='app'>
-   <field name='OrderID' required='Y' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='Y' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <field name='ClOrdID' required='Y' />
    <field name='ClOrdLinkID' required='N' />
@@ -317,7 +317,7 @@
    <component name='InstrmtGrp' required='N' />
    <component name='UndInstrmtGrp' required='N' />
    <component name='InstrmtLegGrp' required='N' />
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <field name='ClOrdID' required='N' />
    <component name='LinesOfTextGrp' required='Y' />
    <field name='RawDataLength' required='N' />
@@ -424,7 +424,7 @@
   </message>
   <message name='OrderCancelRequest' msgtype='F' msgcat='app'>
    <field name='OrigClOrdID' required='Y' />
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <field name='ClOrdID' required='Y' />
    <field name='SecondaryClOrdID' required='N' />
    <field name='ClOrdLinkID' required='N' />
@@ -446,7 +446,7 @@
    <field name='EncodedText' required='N' />
   </message>
   <message name='OrderCancelReplaceRequest' msgtype='G' msgcat='app'>
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <component name='Parties' required='N' />
    <field name='TradeOriginationDate' required='N' />
    <field name='TradeDate' required='N' />
@@ -523,7 +523,7 @@
    <field name='Designation' required='N' />
   </message>
   <message name='OrderStatusRequest' msgtype='H' msgcat='app'>
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <field name='ClOrdID' required='Y' />
    <field name='SecondaryClOrdID' required='N' />
    <field name='ClOrdLinkID' required='N' />
@@ -658,8 +658,8 @@
    <component name='AllocAckGrp' required='N' />
   </message>
   <message name='DontKnowTrade' msgtype='Q' msgcat='app'>
-   <field name='OrderID' required='Y' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='Y' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='ExecID' required='Y' />
    <field name='DKReason' required='Y' />
    <component name='Instrument' required='Y' />
@@ -756,33 +756,40 @@
    <field name='TransactTime' required='Y' />
    <component name='SettlInstGrp' required='N' />
   </message>
+
+  <!-- See docs: https://docs.deribit.com/#market-data-request-v -->
   <message name='MarketDataRequest' msgtype='V' msgcat='app'>
    <field name='MDReqID' required='Y' />
    <field name='SubscriptionRequestType' required='Y' />
    <field name='MarketDepth' required='Y' />
    <field name='MDUpdateType' required='N' />
-   <field name='AggregatedBook' required='N' />
-   <field name='OpenCloseSettlFlag' required='N' />
-   <field name='Scope' required='N' />
-   <field name='MDImplicitDelete' required='N' />
+   <field name='DeribitSkipBlockTrades' required='N' />
+   <field name='DeribitShowBlockTradeId' required='N' />
+   <field name='DeribitTradeAmount' required='N' />
+   <field name='DeribitSinceTimestamp' required='N' />
+
    <component name='MDReqGrp' required='Y' />
    <component name='InstrmtMDReqGrp' required='Y' />
-   <component name='TrdgSesGrp' required='N' />
-   <field name='ApplQueueAction' required='N' />
-   <field name='ApplQueueMax' required='N' />
   </message>
+
+  <!-- See docs: https://docs.deribit.com/#market-data-snapshot-full-refresh-w -->
   <message name='MarketDataSnapshotFullRefresh' msgtype='W' msgcat='app'>
+   <field name='Symbol' required='Y' />
    <field name='MDReqID' required='N' />
-   <component name='Instrument' required='Y' />
-   <component name='UnderlyingInstrument' required='N' />
-   <component name='UndInstrmtGrp' required='N' />
-   <component name='InstrmtLegGrp' required='N' />
-   <field name='FinancialStatus' required='N' />
-   <field name='CorporateAction' required='N' />
-   <field name='NetChgPrevDay' required='N' />
+
+   <!-- Only required for options -->
+   <field name='UnderlyingSymbol' required='N' /> 
+   <field name='UnderlyingPx' required='N' />
+
+   <field name='ContractMultiplier' required='N' />
+   <field name='PutOrCall' required='N' />
+   <field name='TradeVolume24h' required='N' />
+   <field name='MarkPrice' required='N' />
+   <field name='OpenInterest' required='N' />
+   <field name='CurrentFunding' required='N' />
+   <field name='Funding8h' required='N' />
+
    <component name='MDFullGrp' required='Y' />
-   <field name='ApplQueueDepth' required='N' />
-   <field name='ApplQueueResolution' required='N' />
   </message>
   <message name='MarketDataIncrementalRefresh' msgtype='X' msgcat='app'>
    <field name='MDReqID' required='N' />
@@ -1050,8 +1057,8 @@
   <message name='OrderMassCancelReport' msgtype='r' msgcat='app'>
    <field name='ClOrdID' required='N' />
    <field name='SecondaryClOrdID' required='N' />
-   <field name='OrderID' required='Y' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='Y' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='MassCancelRequestType' required='Y' />
    <field name='MassCancelResponse' required='Y' />
    <field name='MassCancelRejectReason' required='N' />
@@ -1115,7 +1122,7 @@
    <field name='Designation' required='N' />
   </message>
   <message name='CrossOrderCancelReplaceRequest' msgtype='t' msgcat='app'>
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <field name='CrossID' required='Y' />
    <field name='OrigCrossID' required='Y' />
    <field name='CrossType' required='Y' />
@@ -1164,7 +1171,7 @@
    <field name='Designation' required='N' />
   </message>
   <message name='CrossOrderCancelRequest' msgtype='u' msgcat='app'>
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <field name='CrossID' required='Y' />
    <field name='OrigCrossID' required='Y' />
    <field name='CrossType' required='Y' />
@@ -1320,7 +1327,7 @@
    <field name='MultiLegRptTypeReq' required='N' />
   </message>
   <message name='MultilegOrderCancelReplace' msgtype='AC' msgcat='app'>
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <field name='OrigClOrdID' required='Y' />
    <field name='ClOrdID' required='Y' />
    <field name='SecondaryClOrdID' required='N' />
@@ -1403,7 +1410,7 @@
    <field name='SecondaryTradeReportID' required='N' />
    <field name='ExecID' required='N' />
    <field name='ExecType' required='N' />
-   <field name='OrderID' required='N' />
+   <field name='OrderId' required='N' />
    <field name='ClOrdID' required='N' />
    <field name='MatchStatus' required='N' />
    <field name='TrdType' required='N' />
@@ -2053,8 +2060,8 @@
    <field name='Account' required='N' />
    <field name='AccountType' required='N' />
    <field name='ClOrdID' required='N' />
-   <field name='OrderID' required='N' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='N' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <component name='ExecCollGrp' required='N' />
    <component name='TrdCollGrp' required='N' />
@@ -2101,8 +2108,8 @@
    <field name='Account' required='N' />
    <field name='AccountType' required='N' />
    <field name='ClOrdID' required='N' />
-   <field name='OrderID' required='N' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='N' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <component name='ExecCollGrp' required='N' />
    <component name='TrdCollGrp' required='N' />
@@ -2151,8 +2158,8 @@
    <field name='Account' required='N' />
    <field name='AccountType' required='N' />
    <field name='ClOrdID' required='N' />
-   <field name='OrderID' required='N' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='N' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <component name='ExecCollGrp' required='N' />
    <component name='TrdCollGrp' required='N' />
@@ -2192,8 +2199,8 @@
    <field name='Account' required='N' />
    <field name='AccountType' required='N' />
    <field name='ClOrdID' required='N' />
-   <field name='OrderID' required='N' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='N' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <component name='ExecCollGrp' required='N' />
    <component name='TrdCollGrp' required='N' />
@@ -2239,8 +2246,8 @@
    <field name='Account' required='N' />
    <field name='AccountType' required='N' />
    <field name='ClOrdID' required='N' />
-   <field name='OrderID' required='N' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='N' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <component name='ExecCollGrp' required='N' />
    <component name='TrdCollGrp' required='N' />
@@ -2312,8 +2319,8 @@
    <field name='Account' required='N' />
    <field name='AccountType' required='N' />
    <field name='ClOrdID' required='N' />
-   <field name='OrderID' required='N' />
-   <field name='SecondaryOrderID' required='N' />
+   <field name='OrderId' required='N' />
+   <field name='SecondaryOrderId' required='N' />
    <field name='SecondaryClOrdID' required='N' />
    <component name='ExecCollGrp' required='N' />
    <component name='TrdCollGrp' required='N' />
@@ -2866,10 +2873,8 @@
    </group>
   </component>
   <component name='InstrmtMDReqGrp'>
-   <group name='NoRelatedSym' required='Y'>
-    <component name='Instrument' required='Y' />
-    <component name='UndInstrmtGrp' required='N' />
-    <component name='InstrmtLegGrp' required='N' />
+   <group name='NoRelatedSym' required='N'>
+    <field name='Symbol' required='Y' />
    </group>
   </component>
   <component name='InstrmtStrkPxGrp'>
@@ -3024,37 +3029,18 @@
    <group name='NoMDEntries' required='Y'>
     <field name='MDEntryType' required='Y' />
     <field name='MDEntryPx' required='N' />
-    <field name='Currency' required='N' />
     <field name='MDEntrySize' required='N' />
     <field name='MDEntryDate' required='N' />
-    <field name='MDEntryTime' required='N' />
-    <field name='TickDirection' required='N' />
-    <field name='MDMkt' required='N' />
-    <field name='TradingSessionID' required='N' />
-    <field name='TradingSessionSubID' required='N' />
-    <field name='QuoteCondition' required='N' />
-    <field name='TradeCondition' required='N' />
-    <field name='MDEntryOriginator' required='N' />
-    <field name='LocationID' required='N' />
-    <field name='DeskID' required='N' />
-    <field name='OpenCloseSettlFlag' required='N' />
-    <field name='TimeInForce' required='N' />
-    <field name='ExpireDate' required='N' />
-    <field name='ExpireTime' required='N' />
-    <field name='MinQty' required='N' />
-    <field name='ExecInst' required='N' />
-    <field name='SellerDays' required='N' />
-    <field name='OrderID' required='N' />
-    <field name='QuoteEntryID' required='N' />
-    <field name='MDEntryBuyer' required='N' />
-    <field name='MDEntrySeller' required='N' />
-    <field name='NumberOfOrders' required='N' />
-    <field name='MDEntryPositionNo' required='N' />
-    <field name='Scope' required='N' />
-    <field name='PriceDelta' required='N' />
+    <field name='DeribitTradeId' required='N' />
+    <field name='Side' required='N' />
+    <field name='Price' required='N' />
     <field name='Text' required='N' />
-    <field name='EncodedTextLen' required='N' />
-    <field name='EncodedText' required='N' />
+    <field name='OrderId' required='N' />
+    <field name='SecondaryOrderId' required='N' />
+    <field name='OrdStatus' required='N' />
+    <field name='DeribitLabel' required='N' />
+    <field name='DeribitLiquidation' required='N' />
+    <field name='TrdMatchID' required='N' />
    </group>
   </component>
   <component name='MDIncGrp'>
@@ -3090,7 +3076,7 @@
     <field name='MinQty' required='N' />
     <field name='ExecInst' required='N' />
     <field name='SellerDays' required='N' />
-    <field name='OrderID' required='N' />
+    <field name='OrderId' required='N' />
     <field name='QuoteEntryID' required='N' />
     <field name='MDEntryBuyer' required='N' />
     <field name='MDEntrySeller' required='N' />
@@ -3125,8 +3111,8 @@
   <component name='OrdAllocGrp'>
    <group name='NoOrders' required='N'>
     <field name='ClOrdID' required='N' />
-    <field name='OrderID' required='N' />
-    <field name='SecondaryOrderID' required='N' />
+    <field name='OrderId' required='N' />
+    <field name='SecondaryOrderId' required='N' />
     <field name='SecondaryClOrdID' required='N' />
     <field name='ListID' required='N' />
     <component name='NestedParties2' required='N' />
@@ -3536,8 +3522,8 @@
   <component name='TrdCapRptSideGrp'>
    <group name='NoSides' required='Y'>
     <field name='Side' required='Y' />
-    <field name='OrderID' required='Y' />
-    <field name='SecondaryOrderID' required='N' />
+    <field name='OrderId' required='Y' />
+    <field name='SecondaryOrderId' required='N' />
     <field name='ClOrdID' required='N' />
     <field name='SecondaryClOrdID' required='N' />
     <field name='ListID' required='N' />
@@ -3958,7 +3944,7 @@
    <value enum='BH' description='CONFIRMATION_REQUEST' />
   </field>
   <field number='36' name='NewSeqNo' type='SEQNUM' />
-  <field number='37' name='OrderID' type='STRING' />
+  <field number='37' name='OrderId' type='STRING' />
   <field number='38' name='OrderQty' type='QTY' />
   <field number='39' name='OrdStatus' type='CHAR'>
    <value enum='0' description='NEW' />
@@ -4452,7 +4438,7 @@
    <value enum='0' description='FX_NETTING' />
    <value enum='1' description='FX_SWAP' />
   </field>
-  <field number='198' name='SecondaryOrderID' type='STRING' />
+  <field number='198' name='SecondaryOrderId' type='STRING' />
   <field number='199' name='NoIOIQualifiers' type='NUMINGROUP' />
   <field number='200' name='MaturityMonthYear' type='MONTHYEAR' />
   <field number='201' name='PutOrCall' type='INT'>
@@ -4653,7 +4639,7 @@
   </field>
   <field number='270' name='MDEntryPx' type='PRICE' />
   <field number='271' name='MDEntrySize' type='QTY' />
-  <field number='272' name='MDEntryDate' type='UTCDATEONLY' />
+  <field number='272' name='MDEntryDate' type='UTCTimestamp' />
   <field number='273' name='MDEntryTime' type='UTCTIMEONLY' />
   <field number='274' name='TickDirection' type='CHAR'>
    <value enum='0' description='PLUS_TICK' />
@@ -6597,5 +6583,16 @@
   <field number='954' name='Nested3PartySubIDType' type='INT' />
   <field number='955' name='LegContractSettlMonth' type='MONTHYEAR' />
   <field number='956' name='LegInterestAccrualDate' type='LOCALMKTDATE' />
+  <field number='9011' name='DeribitSkipBlockTrades' type='BOOLEAN' />
+  <field number='9012' name='DeribitShowBlockTradeId' type='BOOLEAN' />
+  <field number='100007' name='DeribitTradeAmount' type='INT' />
+  <field number='100008' name='DeribitSinceTimestamp' type='INT' />
+  <field number='100087' name='TradeVolume24h' type='QTY' />
+  <field number='100090' name='MarkPrice' type='PRICE' />
+  <field number='100092' name='CurrentFunding' type='PRICE' />
+  <field number='100093' name='Funding8h' type='PRICE' />
+  <field number='100009' name='DeribitTradeId' type='STRING' />
+  <field number='100010' name='DeribitLabel' type='STRING' />
+  <field number='100091' name='DeribitLiquidation' type='STRING' />
  </fields>
 </fix>
