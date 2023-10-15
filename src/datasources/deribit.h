@@ -41,7 +41,7 @@ namespace Deribit
     /* Actions */
     void run() EXCEPT(std::runtime_error);
     void request_test();
-    void request_order_book(std::string const &symbol, int depth);
+    void request_order_book(std::string const &symbol);
     void request_symbol_info();
 
     /* Implementing Application interface */
@@ -60,6 +60,7 @@ namespace Deribit
 
     /* Implementing MessageCracker interface */
     virtual void onMessage(FIX44::MarketDataSnapshotFullRefresh const &, FIX::SessionID const &) override;
+    virtual void onMessage(FIX44::MarketDataIncrementalRefresh const &, FIX::SessionID const &) override;
 
     // // Following are the custom fields that Deribit uses, these can be found in their FIX documentation.
     // // https://docs.deribit.com/#market-data-request-v

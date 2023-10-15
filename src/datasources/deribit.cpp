@@ -8,6 +8,7 @@
 #include <quickfix/SocketInitiator.h>
 #include <quickfix/fix44/MarketDataRequest.h>
 #include <quickfix/fix44/MarketDataSnapshotFullRefresh.h>
+#include <quickfix/fix44/MarketDataIncrementalRefresh.h>
 
 #include "../crypto.h"
 
@@ -73,7 +74,7 @@ namespace Deribit
            std::to_string(this->m_request_id).c_str());
   }
 
-  void Fix::request_order_book(std::string const &symbol, int depth)
+  void Fix::request_order_book(std::string const &symbol)
   {
     FIX::Message message;
     FIX::Header &header = message.getHeader();
@@ -84,8 +85,14 @@ namespace Deribit
     message.setField(FIX::SubscriptionRequestType(
         FIX::SubscriptionRequestType_SNAPSHOT_AND_UPDATES));
 
-    message.setField(FIX::MarketDepth(depth));
-    message.setField(FIX::MDUpdateType(0));
+    // When requesting a subscription (SubscriptionRequestType=1), the only supported combinations are:
+    // MDUpdateType=1, MarketDepth=0. This will result a Market Data - Snapshot(W) with the whole order book,
+    // followed by incremental updates (X messages) through the whole order book depth.
+    // MDUpdateType=0, MarketDepth=(1,10,20). This results in Market Data - Full Refresh(W) messages,
+    // containing the entire specified order book depth. Valid values for MarketDepth are 1, 10, 20.
+    // See docs: <https://docs.deribit.com/#market-data-request-v>
+    message.setField(FIX::MDUpdateType(1));
+    message.setField(FIX::MarketDepth(0));
 
     // Request only bid and ask prices
     message.setField(FIX::NoMDEntryTypes(2));
@@ -96,11 +103,10 @@ namespace Deribit
     message.addGroup(entry_types);
 
     FIX::Session::sendToTarget(message, this->m_session_id);
-    printf("[%s][request_order_book] Sent market data (orderbook) request %s for %s with depth %d\n",
+    printf("[%s][request_order_book] Sent market data (orderbook) request %s for %s\n",
            this->m_session_id.toString().c_str(),
            std::to_string(this->m_request_id).c_str(),
-           symbol.c_str(),
-           depth);
+           symbol.c_str());
   }
 
   void Fix::request_symbol_info()
@@ -231,9 +237,47 @@ namespace Deribit
       if (md_entry_type != '0' && md_entry_type != '1')
         continue;
 
-      printf("[%s][onMessage] Received market data (orderbook) for %s: %s at %s for %s at %s\n",
+      printf("[%s][onMessage] Received order book snapshot for %s: %s at %s for %s at %s\n",
              session_id.toString().c_str(),
              symbol.getString().c_str(),
+             md_entry_type == '0' ? "bid" : "ask",
+             md_entry_price.getString().c_str(),
+             md_entry_size.getString().c_str(),
+             md_entry_date.getString().c_str());
+    }
+  }
+
+  void Fix::onMessage(FIX44::MarketDataIncrementalRefresh const &message, FIX::SessionID const &session_id)
+  {
+    std::string symbol = message.getField(FIX::FIELD::Symbol);
+    FIX::NoMDEntries no_md_entries;
+    FIX44::MarketDataIncrementalRefresh::NoMDEntries entries_group;
+
+    message.get(no_md_entries);
+
+    for (size_t i = 0; i < no_md_entries; i++)
+    {
+      message.getGroup(i + 1, entries_group);
+
+      FIX::MDUpdateAction md_update_action; // 0=new, 1=change, 2=delete
+      FIX::MDEntryType md_entry_type;       // 0=bid, 1=ask, 2=trade
+      FIX::MDEntryPx md_entry_price;
+      FIX::MDEntrySize md_entry_size;
+      FIX::MDEntryDate md_entry_date;
+
+      entries_group.get(md_update_action);
+      entries_group.get(md_entry_type);
+      entries_group.get(md_entry_price);
+      entries_group.get(md_entry_size);
+      entries_group.get(md_entry_date);
+
+      // Ignore other types of market data except for bid and ask
+      if (md_entry_type != '0' && md_entry_type != '1')
+        continue;
+
+      printf("[%s][onMessage] Received order book delta for %s: %s at %s for %s at %s\n",
+             session_id.toString().c_str(),
+             symbol.c_str(),
              md_entry_type == '0' ? "bid" : "ask",
              md_entry_price.getString().c_str(),
              md_entry_size.getString().c_str(),

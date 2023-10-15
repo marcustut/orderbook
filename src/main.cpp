@@ -25,7 +25,7 @@ int main()
     /*     application.request_symbol_info(); */
 
     // Request market data
-    application.request_order_book("BTC-PERPETUAL", 1);
+    application.request_order_book("BTC-PERPETUAL");
 
     while (true)
     {
