@@ -49,8 +49,8 @@ namespace Deribit
                                    *this->m_settings, *this->m_log_factory);
 
       m_initiator->start();
-      printf("[%s][run] Started socket initiator\n",
-             this->m_session_id.toString().c_str());
+      // printf("[%s][run] Started socket initiator\n",
+      //        this->m_session_id.toString().c_str());
     }
     catch (std::exception const &exception)
     {
@@ -58,6 +58,16 @@ namespace Deribit
       delete m_initiator;
       throw std::runtime_error("Error running Fix");
     }
+  }
+
+  void Fix::attach_bid_ask_snapshot_handler(std::function<void(std::string const &, BidAskSnapshot const &)> handler)
+  {
+    this->m_bid_ask_snapshot_handler = handler;
+  }
+
+  void Fix::attach_bid_ask_delta_handler(std::function<void(std::string const &, BidAskDelta const &)> handler)
+  {
+    this->m_bid_ask_delta_handler = handler;
   }
 
   void Fix::request_test()
@@ -69,9 +79,9 @@ namespace Deribit
     message.setField(FIX::TestReqID(std::to_string(this->m_request_id++)));
 
     FIX::Session::sendToTarget(message, this->m_session_id);
-    printf("[%s][test_request] Sent test request %s \n",
-           this->m_session_id.toString().c_str(),
-           std::to_string(this->m_request_id).c_str());
+    // printf("[%s][test_request] Sent test request %s \n",
+    //        this->m_session_id.toString().c_str(),
+    //        std::to_string(this->m_request_id).c_str());
   }
 
   void Fix::request_order_book(std::string const &symbol)
@@ -103,10 +113,10 @@ namespace Deribit
     message.addGroup(entry_types);
 
     FIX::Session::sendToTarget(message, this->m_session_id);
-    printf("[%s][request_order_book] Sent market data (orderbook) request %s for %s\n",
-           this->m_session_id.toString().c_str(),
-           std::to_string(this->m_request_id).c_str(),
-           symbol.c_str());
+    // printf("[%s][request_order_book] Sent market data (orderbook) request %s for %s\n",
+    //        this->m_session_id.toString().c_str(),
+    //        std::to_string(this->m_request_id).c_str(),
+    //        symbol.c_str());
   }
 
   void Fix::request_symbol_info()
@@ -122,33 +132,33 @@ namespace Deribit
     message.setField(FIX::FIELD::SecurityListRequestType, "0");
 
     FIX::Session::sendToTarget(message, this->m_session_id);
-    printf("[%s][request_symbol_info] Sent security list request %s \n",
-           this->m_session_id.toString().c_str(),
-           std::to_string(this->m_request_id).c_str());
+    // printf("[%s][request_symbol_info] Sent security list request %s \n",
+    //        this->m_session_id.toString().c_str(),
+    //        std::to_string(this->m_request_id).c_str());
   }
 
   void Fix::onCreate(const FIX::SessionID &session_id)
   {
     this->m_session_id = session_id;
-    printf("[%s][onCreate] FIX::Session created\n",
-           this->m_session_id.toString().c_str());
+    // printf("[%s][onCreate] FIX::Session created\n",
+    //        this->m_session_id.toString().c_str());
   }
 
   void Fix::onLogon(const FIX::SessionID &session_id)
   {
-    printf("[%s][onLogon] Logged on\n", this->m_session_id.toString().c_str());
+    // printf("[%s][onLogon] Logged on\n", this->m_session_id.toString().c_str());
   }
 
   void Fix::onLogout(const FIX::SessionID &session_id)
   {
-    printf("[%s][onLogout] Logged out\n", this->m_session_id.toString().c_str());
+    // printf("[%s][onLogout] Logged out\n", this->m_session_id.toString().c_str());
   }
 
   void Fix::fromAdmin(const FIX::Message &message,
                       const FIX::SessionID &session_id)
   {
-    printf("[%s][fromAdmin] Received %s\n", this->m_session_id.toString().c_str(),
-           message.getHeader().getField(FIX::FIELD::MsgType).c_str());
+    // printf("[%s][fromAdmin] Received %s\n", this->m_session_id.toString().c_str(),
+    //        message.getHeader().getField(FIX::FIELD::MsgType).c_str());
   }
 
   void Fix::fromApp(const FIX::Message &message,
@@ -156,8 +166,8 @@ namespace Deribit
       EXCEPT(FieldNotFound, IncorrectDataFormat, IncorrectTagValue,
              UnsupportedMessageType)
   {
-    printf("[%s][fromApp] Received %s\n", this->m_session_id.toString().c_str(),
-           message.getHeader().getField(FIX::FIELD::MsgType).c_str());
+    // printf("[%s][fromApp] Received %s\n", this->m_session_id.toString().c_str(),
+    //        message.getHeader().getField(FIX::FIELD::MsgType).c_str());
     crack(message, session_id);
   }
 
@@ -198,16 +208,16 @@ namespace Deribit
       message.setField(FIX::ResetSeqNumFlag("N"));
     }
 
-    printf("[%s][toAdmin] Sending %s...\n", this->m_session_id.toString().c_str(),
-           msg_type.c_str());
+    // printf("[%s][toAdmin] Sending %s...\n", this->m_session_id.toString().c_str(),
+    //        msg_type.c_str());
   }
 
   void Fix::toApp(FIX::Message &message, const FIX::SessionID &session_id)
       EXCEPT(DoNotSend)
   {
 
-    printf("[%s][toApp] Sending %s...\n", this->m_session_id.toString().c_str(),
-           message.getHeader().getField(FIX::FIELD::MsgType).c_str());
+    // printf("[%s][toApp] Sending %s...\n", this->m_session_id.toString().c_str(),
+    //        message.getHeader().getField(FIX::FIELD::MsgType).c_str());
   }
 
   void Fix::onMessage(FIX44::MarketDataSnapshotFullRefresh const &message, FIX::SessionID const &session_id)
@@ -219,6 +229,8 @@ namespace Deribit
     message.get(symbol);
     message.get(no_md_entries);
 
+    BidAskSnapshot snapshot;
+
     for (size_t i = 0; i < no_md_entries; i++)
     {
       message.getGroup(i + 1, entries_group);
@@ -226,25 +238,26 @@ namespace Deribit
       FIX::MDEntryType md_entry_type; // 0=bid, 1=ask, 2=trade, 3=indexValue, 6=settlementPrice
       FIX::MDEntryPx md_entry_price;
       FIX::MDEntrySize md_entry_size;
-      FIX::MDEntryDate md_entry_date;
 
       entries_group.get(md_entry_type);
-      entries_group.get(md_entry_price);
-      entries_group.get(md_entry_size);
-      entries_group.get(md_entry_date);
-
       // Ignore other types of market data except for bid and ask
       if (md_entry_type != '0' && md_entry_type != '1')
         continue;
+      entries_group.get(md_entry_price);
+      entries_group.get(md_entry_size);
 
-      printf("[%s][onMessage] Received order book snapshot for %s: %s at %s for %s at %s\n",
-             session_id.toString().c_str(),
-             symbol.getString().c_str(),
-             md_entry_type == '0' ? "bid" : "ask",
-             md_entry_price.getString().c_str(),
-             md_entry_size.getString().c_str(),
-             md_entry_date.getString().c_str());
+      if (md_entry_type == '0')
+        snapshot.bids.push_back({md_entry_price, md_entry_size});
+      else if (md_entry_type == '1')
+        snapshot.asks.push_back({md_entry_price, md_entry_size});
     }
+
+    // printf("[%s][onMessage] Received order book snapshot for %s\n",
+    //        session_id.toString().c_str(),
+    //        symbol.getString().c_str());
+
+    if (this->m_bid_ask_snapshot_handler)
+      this->m_bid_ask_snapshot_handler(symbol, snapshot);
   }
 
   void Fix::onMessage(FIX44::MarketDataIncrementalRefresh const &message, FIX::SessionID const &session_id)
@@ -255,6 +268,8 @@ namespace Deribit
 
     message.get(no_md_entries);
 
+    BidAskDelta delta;
+
     for (size_t i = 0; i < no_md_entries; i++)
     {
       message.getGroup(i + 1, entries_group);
@@ -263,25 +278,42 @@ namespace Deribit
       FIX::MDEntryType md_entry_type;       // 0=bid, 1=ask, 2=trade
       FIX::MDEntryPx md_entry_price;
       FIX::MDEntrySize md_entry_size;
-      FIX::MDEntryDate md_entry_date;
 
       entries_group.get(md_update_action);
       entries_group.get(md_entry_type);
-      entries_group.get(md_entry_price);
-      entries_group.get(md_entry_size);
-      entries_group.get(md_entry_date);
-
       // Ignore other types of market data except for bid and ask
       if (md_entry_type != '0' && md_entry_type != '1')
         continue;
+      entries_group.get(md_entry_price);
+      entries_group.get(md_entry_size);
 
-      printf("[%s][onMessage] Received order book delta for %s: %s at %s for %s at %s\n",
-             session_id.toString().c_str(),
-             symbol.c_str(),
-             md_entry_type == '0' ? "bid" : "ask",
-             md_entry_price.getString().c_str(),
-             md_entry_size.getString().c_str(),
-             md_entry_date.getString().c_str());
+      OfferAction action;
+      switch (md_update_action)
+      {
+      case '0':
+        action = OfferAction::Add;
+        break;
+      case '1':
+        action = OfferAction::Update;
+        break;
+      case '2':
+        action = OfferAction::Remove;
+        break;
+      default:
+        throw std::runtime_error("Unknown md_update_action");
+      }
+
+      if (md_entry_type == '0')
+        delta.bids.push_back({action, {md_entry_price, md_entry_size}});
+      else if (md_entry_type == '1')
+        delta.asks.push_back({action, {md_entry_price, md_entry_size}});
     }
+
+    // printf("[%s][onMessage] Received order book delta for %s\n",
+    //        session_id.toString().c_str(),
+    //        symbol.c_str());
+
+    if (this->m_bid_ask_delta_handler)
+      this->m_bid_ask_delta_handler(symbol, delta);
   }
 } // namespace Deribit

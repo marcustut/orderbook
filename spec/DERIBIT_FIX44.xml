@@ -4620,7 +4620,7 @@
   </field>
   <field number='270' name='MDEntryPx' type='PRICE' />
   <field number='271' name='MDEntrySize' type='QTY' />
-  <field number='272' name='MDEntryDate' type='UTCTimestamp' />
+  <field number='272' name='MDEntryDate' type='UTCTIMESTAMP' />
   <field number='273' name='MDEntryTime' type='UTCTIMEONLY' />
   <field number='274' name='TickDirection' type='CHAR'>
    <value enum='0' description='PLUS_TICK' />

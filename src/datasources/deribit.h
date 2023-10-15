@@ -9,6 +9,8 @@
 #include <quickfix/Field.h>
 #include <sys/_types/_int64_t.h>
 
+#include "./datasource.h"
+
 namespace Deribit
 {
   class Fix : public FIX::Application, public FIX::MessageCracker
@@ -31,7 +33,13 @@ namespace Deribit
     std::unique_ptr<FIX::FileStoreFactory> m_store_factory;
     std::unique_ptr<FIX::FileLogFactory> m_log_factory;
 
+    // Handler callbacks
+    std::function<void(std::string const &symbol, BidAskSnapshot const &)> m_bid_ask_snapshot_handler;
+    std::function<void(std::string const &symbol, BidAskDelta const &)> m_bid_ask_delta_handler;
+
   public:
+    const static DatasourceID datasource_id = DatasourceID::Deribit;
+
     // Destructor
     ~Fix();
 
@@ -40,6 +48,8 @@ namespace Deribit
 
     /* Actions */
     void run() EXCEPT(std::runtime_error);
+    void attach_bid_ask_snapshot_handler(std::function<void(std::string const &symbol, BidAskSnapshot const &)>);
+    void attach_bid_ask_delta_handler(std::function<void(std::string const &symbol, BidAskDelta const &)>);
     void request_test();
     void request_order_book(std::string const &symbol);
     void request_symbol_info();
