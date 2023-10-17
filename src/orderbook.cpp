@@ -32,30 +32,30 @@ void OrderBook::reset() {
 
 void OrderBook::add_level(Level level, Side side) {
   switch (side) {
-  case Side::Bid:
-    if (bids.contains(level.price)) {
-      bids[level.price].quantity += level.quantity;
-      return;
-    }
-    bids[level.price] = level;
-    break;
-  case Side::Ask:
-    if (asks.contains(level.price)) {
-      asks[level.price].quantity += level.quantity;
-      return;
-    }
-    asks[level.price] = level;
-    break;
+    case Side::Bid:
+      if (bids.contains(level.price)) {
+        bids[level.price].quantity += level.quantity;
+        return;
+      }
+      bids[level.price] = level;
+      break;
+    case Side::Ask:
+      if (asks.contains(level.price)) {
+        asks[level.price].quantity += level.quantity;
+        return;
+      }
+      asks[level.price] = level;
+      break;
   }
 }
 
 void OrderBook::remove_level(double price, Side side) {
   switch (side) {
-  case Side::Bid:
-    bids.erase(price);
-    break;
-  case Side::Ask:
-    asks.erase(price);
-    break;
+    case Side::Bid:
+      bids.erase(price);
+      break;
+    case Side::Ask:
+      asks.erase(price);
+      break;
   }
 }

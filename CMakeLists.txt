@@ -13,11 +13,19 @@ find_package(OpenSSL REQUIRED)
 # Quickfix
 find_package(Quickfix REQUIRED)
 
+# FTXUI
+find_package(FtxUI REQUIRED)
+
 file(GLOB SOURCES src/*.h src/*.cpp src/datasources/*.h src/datasources/*.cpp)
 
 # Add a static library target for the orderbook
 add_library(${CMAKE_PROJECT_NAME} STATIC ${SOURCES})
-target_link_libraries(${CMAKE_PROJECT_NAME} ${QUICKFIX_DYLIB} OpenSSL::SSL)
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    ${QUICKFIX_DYLIB}
+    OpenSSL::SSL
+    ftxui::screen
+    ftxui::dom
+)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${QUICKFIX_INCLUDE_PATH})
 
 # Add a CLI target for the orderbook
