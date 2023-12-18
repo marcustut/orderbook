@@ -33,17 +33,9 @@ void OrderBook::reset() {
 void OrderBook::add_level(Level level, Side side) {
   switch (side) {
     case Side::Bid:
-      if (bids.contains(level.price)) {
-        bids[level.price].quantity += level.quantity;
-        return;
-      }
       bids[level.price] = level;
       break;
     case Side::Ask:
-      if (asks.contains(level.price)) {
-        asks[level.price].quantity += level.quantity;
-        return;
-      }
       asks[level.price] = level;
       break;
   }
@@ -58,4 +50,19 @@ void OrderBook::remove_level(double price, Side side) {
       asks.erase(price);
       break;
   }
+}
+
+std::string OrderBook::to_string(size_t level) {
+  std::string res = "";
+  auto bid_it = bids.rbegin();
+  auto ask_it = asks.begin();
+  for (size_t i = 0; i < level; i++) {
+    auto bid = bid_it->second;
+    auto ask = ask_it->second;
+    res = res + "b: " + std::to_string(bid.price) + "/" + std::to_string(bid.quantity) + "\n";
+    res = "a: " + std::to_string(ask.price) + "/" + std::to_string(ask.quantity) + "\n" + res;
+    bid_it++;
+    ask_it++;
+  }
+  return res;
 }
