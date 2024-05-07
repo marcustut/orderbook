@@ -1,4 +1,6 @@
+#include <chrono>
 #include <iostream>
+#include <string>
 #include <thread>
 
 #include "ftxui/dom/elements.hpp"
@@ -25,6 +27,7 @@ int main() {
           for (auto const& ask : snapshot.asks)
             ob.add_level({ask.price, ask.quantity}, Side::Ask);
         });
+
     application.attach_bid_ask_delta_handler(
         [&ob](std::string const& symbol, BidAskDelta const& delta) {
           for (auto const& bid : delta.bids)
@@ -62,44 +65,49 @@ int main() {
     // Request market data
     application.request_order_book("BTC-PERPETUAL");
 
+    std::string reset_position;
     while (true) {
-      std::this_thread::sleep_for(std::chrono::seconds (1));
-//      std::cout << "[OB] Best bid: "
-//                << ob.best_bid().value_or(Level{0, 0}).price
-//                << ", Best ask: " << ob.best_ask().value_or(Level{0, 0}).price
-//                << std::endl;
-      std::cout << ob.to_string(5) << std::endl;
-      // CSI[2J clears screen, CSI[H moves the cursor to top-left corner
-      std::cout << "\x1B[2J\x1B[H";
-//      auto summary = [&] {
-//        auto content = vbox({
-//            hbox({text(L"- done:   "), text(L"3") | bold}) |
-//                color(Color::Green),
-//            hbox({text(L"- active: "), text(L"2") | bold}) |
-//                color(Color::RedLight),
-//            hbox({text(L"- queue:  "), text(L"9") | bold}) | color(Color::Red),
-//        });
-//        return window(text(L" Summary "), content);
-//      };
+      auto [bids, asks] = ob.top_n(5);
+      if (bids.size() < 5 || asks.size() < 5)
+        continue;
 
-//      auto document =  //
-//          vbox({
-//              hbox({
-//                  summary(),
-//                  summary(),
-//                  summary() | flex,
-//              }),
-//              summary(),
-//              summary(),
-//          });
-//
-//      // Limit the size of the document to 80 char.
-//      document = document | size(WIDTH, LESS_THAN, 80);
-//
-//      auto screen = Screen::Create(Dimension::Full(), Dimension::Fit(document));
-//      Render(screen, document);
-//
-//      std::cout << screen.ToString() << '\0' << std::endl;
+      auto document = vbox({
+                          text(L"Orderbook for BTC-PERPETUAL"),
+                          separator(),
+                          text(std::to_string(asks[4].price) + " " +
+                               std::to_string(asks[4].quantity)),
+                          text(std::to_string(asks[3].price) + " " +
+                               std::to_string(asks[3].quantity)),
+                          text(std::to_string(asks[2].price) + " " +
+                               std::to_string(asks[2].quantity)),
+                          text(std::to_string(asks[1].price) + " " +
+                               std::to_string(asks[1].quantity)),
+                          text(std::to_string(asks[0].price) + " " +
+                               std::to_string(asks[0].quantity)),
+                          separator(),
+                          text(std::to_string(bids[0].price) + " " +
+                               std::to_string(bids[0].quantity)),
+                          text(std::to_string(bids[1].price) + " " +
+                               std::to_string(bids[1].quantity)),
+                          text(std::to_string(bids[2].price) + " " +
+                               std::to_string(bids[2].quantity)),
+                          text(std::to_string(bids[3].price) + " " +
+                               std::to_string(bids[3].quantity)),
+                          text(std::to_string(bids[4].price) + " " +
+                               std::to_string(bids[4].quantity)),
+                      }) |
+                      border;
+
+      document = vbox(filler(), document);
+
+      auto screen = Screen::Create(Dimension::Full());
+      Render(screen, document);
+      std::cout << reset_position;
+      screen.Print();
+      reset_position = screen.ResetPosition();
+
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(0.01s);  // Rerender every 0.01s.
     }
 
     return 0;

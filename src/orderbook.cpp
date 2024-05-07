@@ -1,5 +1,7 @@
 #include "orderbook.h"
 
+#include <iostream>
+
 OrderBook::OrderBook() {
   bids = std::map<double, Level>();
   asks = std::map<double, Level>();
@@ -52,17 +54,19 @@ void OrderBook::remove_level(double price, Side side) {
   }
 }
 
-std::string OrderBook::to_string(size_t level) {
-  std::string res = "";
+std::pair<std::vector<Level>, std::vector<Level>> OrderBook::top_n(
+    size_t level) {
+  std::vector<Level> top_bids, top_asks;
   auto bid_it = bids.rbegin();
   auto ask_it = asks.begin();
-  for (size_t i = 0; i < level; i++) {
+  auto a = std::min(std::min(bids.size(), level), asks.size());
+  for (size_t i = 0; i < a; i++) {
     auto bid = bid_it->second;
     auto ask = ask_it->second;
-    res = res + "b: " + std::to_string(bid.price) + "/" + std::to_string(bid.quantity) + "\n";
-    res = "a: " + std::to_string(ask.price) + "/" + std::to_string(ask.quantity) + "\n" + res;
+    top_bids.push_back(bid);
+    top_asks.push_back(ask);
     bid_it++;
     ask_it++;
   }
-  return res;
+  return std::make_pair(top_bids, top_asks);
 }

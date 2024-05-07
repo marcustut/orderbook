@@ -3,7 +3,7 @@
 
 #include <map>
 #include <optional>
-#include <string>
+#include <vector>
 
 // Determines whether it is a bid or ask level.
 enum class Side { Bid, Ask };
@@ -15,11 +15,11 @@ typedef struct {
 } Level;
 
 class OrderBook {
-private:
+ private:
   std::map<double, Level> bids;
   std::map<double, Level> asks;
 
-public:
+ public:
   OrderBook();
 
   std::optional<Level> best_bid();
@@ -31,7 +31,7 @@ public:
 
   void add_level(Level level, Side side);
   void remove_level(double price, Side side);
-  std::string to_string(size_t level);
+  std::pair<std::vector<Level>, std::vector<Level>> top_n(size_t level);
 };
 
-#endif // orderbook
+#endif  // orderbook
